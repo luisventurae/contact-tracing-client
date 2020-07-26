@@ -35,7 +35,7 @@
             <l-tile-layer :url="url"></l-tile-layer>
             <l-marker v-for="pin in pins" :key="`pin${pin.id}`" :lat-lng="pin.location" ></l-marker>
             <l-circle-marker v-for="pin in pins" :key="`circle${pin.id}`" 
-              :lat-lng="pin.location"
+              :lat-lng="pin.location.coordinates"
               :radius="radius"
               color="red"
             />
@@ -107,7 +107,7 @@ export default {
       axios.get('http://192.168.20.101:12345/location')
       .then((res) => {
         res.data.forEach((pin) => {
-          pin.location = pin.location.map(l => parseFloat(l))
+          pin.location = pin.location.coordinates.map(l => parseFloat(l))
           this.pins.push(pin)
         })
       })
