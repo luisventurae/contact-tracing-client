@@ -1,18 +1,94 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="form">
+      <form @submit.prevent="sendData">
+        <input type="name" v-model="username" placeholder="Nombres" required> <br>
+        <input type="text" v-model="location[0]" placeholder="latitud" required> <br>
+        <input type="text" v-model="location[1]" placeholder="longitud" required> <br>
+        <input type="number" v-model.number="state" placeholder="estado" required> <br>
+        <span>{{ now }}</span> <button type="button" @click="refreshDate" >Actualizar fecha</button> <br><br>
+        <button type="submit">Enviar Datos</button>
+      </form>
+    </div>
+    <br><br>
+    <div class="map">
+      <div id="mapid">
+        <div style="height: 350px;">
+          <div class="info" style="height: 15%">
+            <span>Center: {{ center }}</span>
+            <span>Zoom: {{ zoom }}</span>
+            <span>Bounds: {{ bounds }}</span>
+          </div>
+          <l-map
+            style="height: 80%; width: 100%"
+            :zoom="zoom"
+            :center="center"
+            @update:zoom="zoomUpdated"
+            @update:center="centerUpdated"
+            @update:bounds="boundsUpdated"
+          >
+            <l-tile-layer :url="url"></l-tile-layer>
+          </l-map>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import moment from 'moment'
+import axios from 'axios'
+// import L from 'leaflet'
+import { LMap, LTileLayer } from 'vue2-leaflet'
+// import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
 
 export default {
   name: 'Home',
+  data: () => ({
+    moment: moment,
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    zoom: 7,
+    center: [-12.048404, -77.042615],
+    // bounds: null
+
+    username: null,
+    location: [null,null],
+    state: null,
+    now: new Date(),
+  }),
   components: {
-    HelloWorld
+    LMap,
+    LTileLayer,
+    // LMarker,
+  },
+  methods: {
+    zoomUpdated (zoom) {
+      this.zoom = zoom;
+    },
+    centerUpdated (center) {
+      this.center = center;
+    },
+    boundsUpdated (bounds) {
+      this.bounds = bounds;
+    },
+    refreshDate() {
+      this.now = new Date()
+    },
+    sendData() {
+      axios.post('http://192.168.20.101:12345/location', {
+        username: this.username,
+        location: this.location,
+        state: this.state,
+        time: this.now,
+      }).then(() => console.log('enviado'))
+      .catch((e) => console.error(e))
+    },
   }
 }
 </script>
+
+<style lang="sass" scoped>
+#map-template
+  width: 100px
+  height: 100px
+</style>
