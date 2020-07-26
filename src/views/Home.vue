@@ -28,6 +28,8 @@
             @update:bounds="boundsUpdated"
           >
             <l-tile-layer :url="url"></l-tile-layer>
+            <l-marker v-for="pin in pins" :key="pin.id" :lat-lng="pin.location" ></l-marker>
+            <!-- <l-marker :lat-lng="[1,1]" ></l-marker> -->
           </l-map>
         </div>
       </div>
@@ -39,8 +41,7 @@
 import moment from 'moment'
 import axios from 'axios'
 // import L from 'leaflet'
-import { LMap, LTileLayer } from 'vue2-leaflet'
-// import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
 
 export default {
   name: 'Home',
@@ -49,8 +50,9 @@ export default {
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     zoom: 7,
     center: [-12.048404, -77.042615],
-    // bounds: null
-
+    bounds: null,
+    pins: [],
+    // Formulario
     username: null,
     location: [null,null],
     state: null,
@@ -59,7 +61,10 @@ export default {
   components: {
     LMap,
     LTileLayer,
-    // LMarker,
+    LMarker,
+  },
+  mounted() {
+    this.listData()
   },
   methods: {
     zoomUpdated (zoom) {
@@ -82,6 +87,16 @@ export default {
         time: this.now,
       }).then(() => console.log('enviado'))
       .catch((e) => console.error(e))
+    },
+    listData() {
+      axios.get('http://192.168.20.101:12345/location')
+      .then((res) => {
+        res.data.forEach((pin) => {
+          pin.location = pin.location.map(l => parseFloat(l))
+          this.pins.push(pin)
+        })
+      })
+      .catch((e) => console.error('[listData]',e))
     },
   }
 }
