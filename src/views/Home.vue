@@ -12,12 +12,13 @@
     </div>
     <br><br>
     <div class="map">
+      <button @click="listData">Refrescar Mapa</button><br>
       <div id="mapid">
         <div style="height: 350px;">
           <div class="info" style="height: 15%">
-            <span>Center: {{ center }}</span>
-            <span>Zoom: {{ zoom }}</span>
-            <span>Bounds: {{ bounds }}</span>
+            <!-- <span>Center: {{ center }}</span><br>
+            <span>Zoom: {{ zoom }}</span><br>
+            <span>Bounds: {{ bounds }}</span><br> -->
           </div>
           <l-map
             style="height: 80%; width: 100%"
@@ -28,8 +29,12 @@
             @update:bounds="boundsUpdated"
           >
             <l-tile-layer :url="url"></l-tile-layer>
-            <l-marker v-for="pin in pins" :key="pin.id" :lat-lng="pin.location" ></l-marker>
-            <!-- <l-marker :lat-lng="[1,1]" ></l-marker> -->
+            <l-marker v-for="pin in pins" :key="`pin${pin.id}`" :lat-lng="pin.location" ></l-marker>
+            <l-circle-marker v-for="pin in pins" :key="`circle${pin.id}`" 
+              :lat-lng="pin.location"
+              :radius="radius"
+              color="red"
+            />
           </l-map>
         </div>
       </div>
@@ -41,7 +46,7 @@
 import moment from 'moment'
 import axios from 'axios'
 // import L from 'leaflet'
-import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LCircleMarker } from 'vue2-leaflet'
 
 export default {
   name: 'Home',
@@ -57,11 +62,14 @@ export default {
     location: [null,null],
     state: null,
     now: new Date(),
+    // Radio del marcador
+    radius: 1.5,
   }),
   components: {
     LMap,
     LTileLayer,
     LMarker,
+    LCircleMarker,
   },
   mounted() {
     this.listData()
@@ -89,6 +97,7 @@ export default {
       .catch((e) => console.error(e))
     },
     listData() {
+      this.pins = []
       axios.get('http://192.168.20.101:12345/location')
       .then((res) => {
         res.data.forEach((pin) => {
