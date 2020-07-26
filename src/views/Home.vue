@@ -6,6 +6,10 @@
         <input type="text" v-model="location[0]" placeholder="latitud" required> <br>
         <input type="text" v-model="location[1]" placeholder="longitud" required> <br>
         <input type="number" v-model.number="state" placeholder="estado" required> <br>
+        <select v-model="type" placeholder="Tipo" required>>
+          <option value="taxi">Taxi</option>
+          <option value="peaton">Peaton</option>
+        </select> <br>
         <span>{{ now }}</span> <button type="button" @click="refreshDate" >Actualizar fecha</button> <br><br>
         <button type="submit">Enviar Datos</button>
       </form>
@@ -61,6 +65,7 @@ export default {
     username: null,
     location: [null,null],
     state: null,
+    type: null,
     now: new Date(),
     // Radio del marcador
     radius: 1.5,
@@ -92,6 +97,7 @@ export default {
         username: this.username,
         location: this.location,
         state: this.state,
+        type: this.type,
         time: this.now,
       }).then(() => console.log('enviado'))
       .catch((e) => console.error(e))
